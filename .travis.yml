@@ -2,8 +2,8 @@ language: python
 
 env:
   - PKGS="python=3.7 flake8 black isort"  # Have linters fail first and quickly
-  - PKGS="python=3.7 serialize validators"
-  - PKGS="python=3.8 serialize validators"
+  - PKGS="python=3.7"
+  - PKGS="python=3.8"
 
 before_install:
   - sudo apt-get update
@@ -28,6 +28,7 @@ install:
   - source activate travis
   - if [[ $PKGS =~ flake8 ]]; then LINT=1; else LINT=0; fi
   - if [[ $PKGS =~ sphinx ]]; then DOCS=1; else DOCS=0; fi
+  - if [[ $LINT == 0 && $DOCS == 0 ]]; then pip install serialize validators; fi
   - conda list
 
 script:
