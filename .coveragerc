@@ -1,0 +1,4 @@
+[run]
+source = datastruct
+omit = datastruct/test/*
+
