@@ -182,7 +182,9 @@ class DataStruct:
                     self._found_error(exceptions.WrongTypeError(key, value, container))
                 else:
                     setattr(
-                        self, key, with_qualified_container(self, key, value, k_annot, samekw)
+                        self,
+                        key,
+                        with_qualified_container(self, key, value, k_annot, samekw),
                     )
 
             # (4) Base Generic (e.g. List) are not supported, use list instead
@@ -239,10 +241,15 @@ class DataStruct:
         return tuple(self.__errors__)
 
     @classmethod
-    def from_filename(cls, filename: str, fmt=None,         *,
+    def from_filename(
+        cls,
+        filename: str,
+        fmt=None,
+        *,
         raise_on_error=True,
         err_on_unexpected=True,
-        err_on_missing=True):
+        err_on_missing=True,
+    ):
         """Load the content of a filename into this datastructure
 
         This leverages the serialize library.
@@ -257,4 +264,9 @@ class DataStruct:
         BaseStruct
         """
 
-        return cls(serialize.load(filename, fmt), raise_on_error=raise_on_error, err_on_unexpected=err_on_unexpected, err_on_missing=err_on_missing)
+        return cls(
+            serialize.load(filename, fmt),
+            raise_on_error=raise_on_error,
+            err_on_unexpected=err_on_unexpected,
+            err_on_missing=err_on_missing,
+        )

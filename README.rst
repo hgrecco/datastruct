@@ -23,7 +23,7 @@
 datastruct
 ==========
 
-A small but useful package to load and validate typed data structures, including configuration files.
+A small but useful package to load, validate and use typed data structures, including configuration files.
 
 You get:
 

@@ -2,7 +2,7 @@
     datastruct
     ~~~~~~~~~~~~~
 
-    A small but useful package to load and validate typed data structures, including configuration files.
+    A small but useful package to load, validate and use typed data structures, including configuration files.
 
     :copyright: 2020 by datastruct Authors, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
