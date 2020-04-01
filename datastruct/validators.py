@@ -53,3 +53,15 @@ class URL(StrValidator):
 
 class Domain(StrValidator):
     func = validators.domain
+
+
+def value_in(*valid_values):
+
+    valid_values = set(valid_values)
+
+    class Klass(Validator):
+        @classmethod
+        def validate(self, instance):
+            return instance in valid_values
+
+    return Klass
