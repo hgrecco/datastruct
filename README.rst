@@ -39,7 +39,7 @@ Installation
 
 .. code-block::
 
-    pip install mdform
+    pip install datastruct
 
 Usage
 -----
@@ -72,6 +72,11 @@ If you want to accumulate all errors for inspection:
     >>> cfg = Config.from_filename('settings.yaml', raise_on_error=False)
     >>> print(cfg.get_errors())
 
+You can then use the `DataStruct` object in your code:
+
+.. code-block::python
+
+    >>> print(cfg.email_servers[0].host)
 
 
 See AUTHORS_ for a list of the maintainers.
