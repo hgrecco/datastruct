@@ -9,6 +9,7 @@
 """
 
 import inspect
+import typing
 from typing import List, Tuple, get_type_hints
 
 import serialize
@@ -17,7 +18,7 @@ from . import exceptions, typing_ext
 
 
 def _func_for_annotation(key, annotation, ds_kw):
-    """This recapitulates the same
+    """This recapitulates the same logic as the DS.__init__ for a single element.
 
     TODO: check if it we can avoid this repetirion
 
@@ -40,11 +41,23 @@ def _func_for_annotation(key, annotation, ds_kw):
                 return exc
             return cel
 
+    elif inspect.isclass(annotation) and issubclass(annotation, KeyDefinedValue):
+
+        def func(el):
+            try:
+                cel = annotation.convert(key, el, **ds_kw)
+            except exceptions.ValidationError as exc:
+                raise exc
+
+            return cel
+
     elif hasattr(annotation, "validate"):
 
         def func(el):
+
             if not annotation.validate(el):
                 return exceptions.WrongValueError(key, el, annotation)
+
             return el
 
     else:
@@ -57,23 +70,48 @@ def _func_for_annotation(key, annotation, ds_kw):
     return func
 
 
+def _apply_func(ds, func, parent_key, value):
+    cel = func(value)
+
+    if isinstance(cel, exceptions.ValidationError):
+        ds._found_error(cel.with_parent(parent_key))
+
+    elif isinstance(cel, DataStruct):
+        for err in cel.get_errors():
+            ds._found_error(err.with_parent(parent_key))
+
+    return cel
+
+
 def with_qualified_container(ds: "DataStruct", key, value, annotation, ds_kw):
 
     container = annotation.__origin__
 
-    if container is dict:
+    if container is typing.Union:
+
+        ds_kw_copy = dict(ds_kw)
+        ds_kw_copy["raise_on_error"] = True
+
+        for t in annotation.__args__:
+
+            func = _func_for_annotation(key, t, ds_kw_copy)
+            try:
+                return _apply_func(ds, func, key, value)
+            except exceptions.ValidationError:
+                # If there was an error, try the next.
+                continue
+
+        ds._found_error(exceptions.WrongValueError(key, value, annotation))
+
+    elif container is dict:
         funck = _func_for_annotation(key, annotation.__args__[0], ds_kw)
         funcv = _func_for_annotation(key, annotation.__args__[1], ds_kw)
 
         tmp = []
         for ndx, (elk, elv) in enumerate(value.items()):
-            celk = funck(elk)
-            if isinstance(celk, exceptions.ValidationError):
-                ds._found_error(celk.with_parent("%s[%r]" % (key, elk)))
 
-            celv = funcv(elv)
-            if isinstance(celv, exceptions.ValidationError):
-                ds._found_error(celv.with_parent("%s[%r]" % (key, elk)))
+            celk = _apply_func(ds, funck, "%s[%r]" % (key, elk), elk)
+            celv = _apply_func(ds, funcv, "%s[%r]" % (key, elk), elv)
 
             tmp.append((celk, celv))
 
@@ -84,9 +122,9 @@ def with_qualified_container(ds: "DataStruct", key, value, annotation, ds_kw):
 
         tmp = []
         for ndx, el in enumerate(value):
-            cel = func(el)
-            if isinstance(cel, exceptions.ValidationError):
-                ds._found_error(cel.with_parent("%s[%d]" % (key, ndx)))
+
+            cel = _apply_func(ds, func, "%s[%d]" % (key, ndx), el)
+
             tmp.append(cel)
 
         return container(tmp)
@@ -164,21 +202,40 @@ class DataStruct:
                 else:
                     setattr(self, key, value)
 
+            # ### C
+            elif inspect.isclass(k_annot) and issubclass(k_annot, KeyDefinedValue):
+                try:
+                    value = k_annot.convert(key, value, **samekw)
+                except exceptions.ValidationError as exc:
+                    raise exc.with_parent(key)
+
+                if value.__errors__:
+                    for err in value.__errors__:
+                        self._found_error(err.with_parent(key))
+                else:
+                    setattr(self, key, value)
+
             # (3) If the annotation type has a validate method,
             #     we call it with the value.
             #     If it fails, we report the the
             elif hasattr(k_annot, "validate"):
                 if k_annot.validate(value):
-                    self._found_error(exceptions.WrongValueError(key, value, k_annot))
-                else:
                     setattr(self, key, value)
+                else:
+                    self._found_error(exceptions.WrongValueError(key, value, k_annot))
 
             # (4) If the annotation type is a Qualified Generic (e.g. List[int],
             #     we verify both the container and the content match between schema and value.
             elif typing_ext.is_qualified_generic(k_annot):
 
                 container = k_annot.__origin__
-                if not isinstance(value, container):
+                if container is typing.Union:
+                    setattr(
+                        self,
+                        key,
+                        with_qualified_container(self, key, value, k_annot, samekw),
+                    )
+                elif not isinstance(value, container):
                     self._found_error(exceptions.WrongTypeError(key, value, container))
                 else:
                     setattr(
@@ -270,3 +327,41 @@ class DataStruct:
             err_on_unexpected=err_on_unexpected,
             err_on_missing=err_on_missing,
         )
+
+
+class KeyDefinedValue:
+
+    content: dict
+
+    @classmethod
+    def convert(
+        cls,
+        key,
+        value,
+        raise_on_error=True,
+        err_on_unexpected=True,
+        err_on_missing=True,
+    ):
+        if not isinstance(value, dict):
+            raise exceptions.WrongTypeError(key, value, dict)
+
+        if len(value) != 1:
+            raise exceptions.WrongValueError(key, value, "Len 1")
+
+        k, v = dict(value).popitem()
+
+        if k not in cls.content:
+            raise exceptions.WrongValueError(
+                key, value, "value in %r" % tuple(cls.content.keys())
+            )
+
+        expected = cls.content[k]
+
+        samekw = dict(
+            raise_on_error=raise_on_error,
+            err_on_unexpected=err_on_unexpected,
+            err_on_missing=err_on_missing,
+        )
+        func = _func_for_annotation(key, expected, samekw)
+
+        return func(v)
