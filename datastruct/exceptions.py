@@ -59,6 +59,8 @@ class ValidationError(Exception):
             + ")"
         )
 
+    __str__ = __repr__
+
     def with_parent(self, parent: str):
         """Return a new object of the same class prepending a new parent.
 
@@ -71,17 +73,13 @@ class ValidationError(Exception):
         -------
         a new object of the same class
         """
+        kw = dict(key=self.key)
         if hasattr(self, "value"):
-            return self.__class__(
-                self.key,
-                self.value,
-                parents=(parent,) + self.parents,
-                warning=self.warning,
-            )
-
-        return self.__class__(
-            self.key, parents=(parent,) + self.parents, warning=self.warning
-        )
+            kw["value"] = self.value
+        if hasattr(self, "expected"):
+            kw["expected"] = self.expected
+        kw.update(parents=(parent,) + self.parents, warning=self.warning)
+        return self.__class__(**kw)
 
 
 class MissingValueError(ValidationError):
