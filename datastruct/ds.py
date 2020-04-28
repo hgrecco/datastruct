@@ -10,7 +10,8 @@
 
 import inspect
 import typing
-from typing import List, Tuple, get_type_hints
+from collections import ChainMap
+from typing import Iterable, List, Tuple, get_type_hints
 
 import serialize
 
@@ -138,7 +139,7 @@ class DataStruct:
 
     Parameters
     ----------
-    content : dict
+    content : Mapping
     raise_on_error : bool
         If true, an exception will be raised. If false, the exception will be recorded.
     err_on_unexpected : bool
@@ -323,6 +324,38 @@ class DataStruct:
 
         return cls(
             serialize.load(filename, fmt),
+            raise_on_error=raise_on_error,
+            err_on_unexpected=err_on_unexpected,
+            err_on_missing=err_on_missing,
+        )
+
+    @classmethod
+    def from_filenames(
+        cls,
+        filenames: Iterable[str],
+        fmt=None,
+        *,
+        raise_on_error=True,
+        err_on_unexpected=True,
+        err_on_missing=True,
+    ):
+        """Load the content of a multiple filenames into this datastructure
+
+        This leverages the serialize library.
+
+        Parameters
+        ----------
+        filenames : List[str]
+            Multiple filenames. The first has precedence over the last.
+        fmt : str or None
+            File format. Use None (default) to infer from the extension)
+        Returns
+        -------
+        BaseStruct
+        """
+
+        return cls(
+            ChainMap(*tuple(serialize.load(filename, fmt) for filename in filenames)),
             raise_on_error=raise_on_error,
             err_on_unexpected=err_on_unexpected,
             err_on_missing=err_on_missing,
