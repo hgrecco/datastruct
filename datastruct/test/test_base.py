@@ -47,7 +47,7 @@ def test_missing():
     assert isinstance(errs, tuple)
     assert len(errs) == 1
     e = errs[0]
-    assert e == exceptions.MissingValueError("b")
+    assert e == exceptions.MissingValueError("b", Example)
 
 
 def test_unexpected():

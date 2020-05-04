@@ -68,7 +68,7 @@ def test_tuple_int():
         exceptions.UnexpectedKeyError("c", ExampleSingle)
         .with_index(0)
         .with_parent("n"),
-        exceptions.MissingValueError("a").with_index(0).with_parent("n"),
+        exceptions.MissingValueError("a", ExampleSingle).with_index(0).with_parent("n"),
     )
     assert o.get_errors() == errs
 
@@ -87,7 +87,9 @@ def test_dict_int():
         exceptions.UnexpectedKeyError("c", ExampleSingle)
         .with_index("k")
         .with_parent("n"),
-        exceptions.MissingValueError("a").with_index("k").with_parent("n"),
+        exceptions.MissingValueError("a", ExampleSingle)
+        .with_index("k")
+        .with_parent("n"),
     )
     assert o.get_errors() == errs
 
@@ -106,7 +108,7 @@ def test_nested_list():
         exceptions.UnexpectedKeyError("c", ExampleSingle)
         .with_index(0)
         .with_parent("n"),
-        exceptions.MissingValueError("a").with_index(0).with_parent("n"),
+        exceptions.MissingValueError("a", ExampleSingle).with_index(0).with_parent("n"),
     )
     assert o.get_errors() == errs
 
@@ -125,7 +127,7 @@ def test_nested_tuple():
         exceptions.UnexpectedKeyError("c", ExampleSingle)
         .with_index(0)
         .with_parent("n"),
-        exceptions.MissingValueError("a").with_index(0).with_parent("n"),
+        exceptions.MissingValueError("a", ExampleSingle).with_index(0).with_parent("n"),
     )
     assert o.get_errors() == errs
 
@@ -144,6 +146,8 @@ def test_nested_dict():
         exceptions.UnexpectedKeyError("c", ExampleSingle)
         .with_index("k")
         .with_parent("n"),
-        exceptions.MissingValueError("a").with_index("k").with_parent("n"),
+        exceptions.MissingValueError("a", ExampleSingle)
+        .with_index("k")
+        .with_parent("n"),
     )
     assert o.get_errors() == errs

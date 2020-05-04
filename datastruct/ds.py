@@ -277,7 +277,9 @@ class DataStruct:
         #   and report an error if there is no default value.
         for key, value in th.items():
             if not hasattr(self, key):
-                self.__errors__.append(exceptions.MissingValueError(key))
+                self.__errors__.append(
+                    exceptions.MissingValueError(key, self.__class__)
+                )
 
         for key, value in new_content.items():
             self.__errors__.extend((exc.with_parent(key) for exc in value.get_errors()))

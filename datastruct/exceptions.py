@@ -101,9 +101,10 @@ class MissingValueError(ValidationError):
     """A value required by the schema was not provided.
     """
 
-    def __init__(self, key, **kwargs):
+    def __init__(self, key, klass, **kwargs):
         super().__init__(**kwargs)
         self.key = key
+        self.klass = klass
 
 
 class UnexpectedKeyError(ValidationError):
