@@ -44,7 +44,7 @@ Installation
 Usage
 -----
 
-.. code-block::python
+.. code-block:: python
 
     >>> from typing import List
     >>> from datastruct import DataStruct
@@ -67,14 +67,14 @@ When an invalid value is found, an exception will be raised.
 
 If you want to accumulate all errors for inspection:
 
-.. code-block::python
+.. code-block:: python
 
     >>> cfg = Config.from_filename('settings.yaml', raise_on_error=False)
     >>> print(cfg.get_errors())
 
 You can then use the `DataStruct` object in your code:
 
-.. code-block::python
+.. code-block:: python
 
     >>> print(cfg.email_servers[0].host)
 
