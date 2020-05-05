@@ -1,4 +1,4 @@
 include AUTHORS CHANGES LICENSE README.rst BADGES.rst version.py
 recursive-include datastruct *.py
-exclude pull_request_template.md version.py .coveragerc
+exclude pull_request_template.md version.py .coveragerc .pre-commit-config.yaml
 global-exclude *.pyc *~ .DS_Store *__pycache__* *.pyo
