@@ -9,7 +9,7 @@
 """
 
 from . import validators
-from .ds import DataStruct
+from .ds import INVALID, DataStruct, KeyDefinedValue
 from .exceptions import (
     MissingValueError,
     UnexpectedKeyError,
@@ -26,4 +26,6 @@ __all__ = [
     WrongTypeError,
     WrongValueError,
     ValidationError,
+    KeyDefinedValue,
+    INVALID,
 ]
