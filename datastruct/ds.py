@@ -203,14 +203,7 @@ class DataStruct:
     Parameters
     ----------
     content : Mapping
-    raise_on_error : bool
-        If true, an exception will be raised. If false, the exception will be recorded.
-    err_on_unexpected : bool
-        If true, an unexpected value will produce an error.
-        If false, only a warning is issued.
-    err_on_missing : bool
-        If true, a missing value will produce an error.
-        If false, only a warning is issued.
+
     """
 
     def __init_subclass__(cls, **kwargs):
@@ -317,15 +310,35 @@ class DataStruct:
     def from_dict(
         cls, dct, *, raise_on_error=True, err_on_unexpected=True, err_on_missing=True
     ):
+        """Load the content of a dictionary into this datastructure
+
+        Works just like instantiating the object but adds the ability to raise exceptions.
+
+        Parameters
+        ----------
+        dct : mapping
+        raise_on_error : bool
+            If true, an exception will be raised. If false, the exception will be recorded.
+        err_on_unexpected : bool
+            If true, an unexpected value will produce an error.
+            If false, only a warning is issued.
+        err_on_missing : bool
+            If true, a missing value will produce an error.
+            If false, only a warning is issued.
+
+        Returns
+        -------
+        DataStruct
+        """
 
         ds = cls(dct)
 
         if raise_on_error:
-            err = ds.get_errors(err_on_unexpected, err_on_missing)
-            if len(err) == 1:
-                raise err[0]
-            elif len(err) > 1:
-                raise exceptions.MultipleError(err)
+            errs = ds.get_errors(err_on_unexpected, err_on_missing)
+            if len(errs) == 1:
+                raise errs[0]
+            elif len(errs) > 1:
+                raise exceptions.MultipleError(*errs)
 
         return ds
 
@@ -348,9 +361,18 @@ class DataStruct:
         filename : str
         fmt : str or None
             File format. Use None (default) to infer from the extension)
+        raise_on_error : bool
+            If true, an exception will be raised. If false, the exception will be recorded.
+        err_on_unexpected : bool
+            If true, an unexpected value will produce an error.
+            If false, only a warning is issued.
+        err_on_missing : bool
+            If true, a missing value will produce an error.
+            If false, only a warning is issued.
+
         Returns
         -------
-        BaseStruct
+        DataStruct
         """
 
         return cls.from_dict(
@@ -378,11 +400,18 @@ class DataStruct:
         ----------
         filenames : List[str]
             Multiple filenames. The first has precedence over the last.
-        fmt : str or None
-            File format. Use None (default) to infer from the extension)
+        raise_on_error : bool
+            If true, an exception will be raised. If false, the exception will be recorded.
+        err_on_unexpected : bool
+            If true, an unexpected value will produce an error.
+            If false, only a warning is issued.
+        err_on_missing : bool
+            If true, a missing value will produce an error.
+            If false, only a warning is issued.
+
         Returns
         -------
-        BaseStruct
+        DataStruct
         """
 
         dct = ChainMap(*tuple(serialize.load(filename, fmt) for filename in filenames))
