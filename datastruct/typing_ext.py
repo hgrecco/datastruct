@@ -10,6 +10,11 @@
     :license: BSD, see LICENSE for more details.
 """
 
+# DataStruct only supports Python 3.7+
+# Therefore, we remove from the coverage report the corresponding sections.
+# But we keep the code because it is convenient
+# to have just one file like this across projects.
+
 import typing
 
 if hasattr(typing, "_GenericAlias"):
@@ -48,7 +53,7 @@ if hasattr(typing, "_GenericAlias"):
         return False
 
 
-else:
+else:  # pragma: no cover
     # python <3.7
     if hasattr(typing, "_Union"):
         # python 3.6
