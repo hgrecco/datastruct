@@ -209,9 +209,11 @@ class DataStruct:
     def __init_subclass__(cls, **kwargs):
         errs = []
         for name, annotation in cls.__annotations__.items():
-            if isinstance(annotation, DataStruct):
+            if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
                 continue
-            elif isinstance(annotation, KeyDefinedValue):
+            elif inspect.isclass(annotation) and issubclass(
+                annotation, KeyDefinedValue
+            ):
                 continue
             elif hasattr(annotation, "validate"):
                 continue
