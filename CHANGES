@@ -5,8 +5,12 @@ datastruct Changelog
 0.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
-
+- Improved the code by refactoring
+- Added `DataStruct.from_filenames` to allow merging multiple files.
+- Implemented DataStruct.__init_subclass__ to catch wrong annotations
+  at definition time
+- Enhanced the information included in the exceptions.
+- Much more testing.
 
 0.1 (2020-04-03)
 ----------------
