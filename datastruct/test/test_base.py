@@ -1,4 +1,6 @@
-from datastruct import DataStruct, exceptions
+import typing
+
+from datastruct import DataStruct, KeyDefinedValue, exceptions, validators
 
 
 class Example(DataStruct):
@@ -11,6 +13,19 @@ class Example(DataStruct):
 class ExampleWithDefault(DataStruct):
     a: int
     b: str = "h"
+
+
+def test_exceptions():
+    assert exceptions.ValidationError(path="a") == exceptions.ValidationError(
+        path=("a",)
+    )
+    errs = (
+        exceptions.ValidationError(path=("a",)),
+        exceptions.ValidationError(path=("b",)),
+    )
+    me = exceptions.MultipleError(*errs)
+    assert exceptions.ValidationError(path=("a",)) in me
+    assert exceptions.ValidationError(path=("k",)) not in me
 
 
 def test_simple():
@@ -71,3 +86,42 @@ def test_example_default():
     o = ExampleWithDefault(dict(a=1))
     assert o.a == 1
     assert o.b == "h"
+
+
+def test_validators():
+    assert validators.Email.validate("test@gmail.com")
+    assert not validators.Email.validate("test@gmail")
+    assert not validators.Email.validate(123)
+
+    assert validators.value_in(1, 2, 3).validate(1)
+    assert not validators.value_in(1, 2, 3).validate(4)
+
+
+def test_init_subclass():
+    class KDV(KeyDefinedValue):
+        content = {"a": 1}
+
+    class SC(DataStruct):
+        c1: Example
+        c2: KDV
+        c3: validators.Email
+        c4: typing.List[int]
+        # c5: typing.List
+        c6: int
+
+    assert SC
+
+    try:
+
+        class SC2(DataStruct):
+            c1: Example
+            c2: KDV
+            c3: validators.Email
+            c4: typing.List[int]
+            c5: typing.List
+            c6: int
+
+        assert False
+
+    except TypeError:
+        assert True
