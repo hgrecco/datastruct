@@ -140,3 +140,6 @@ class WrongValueError(ValidationError):
 class MultipleError(ValidationError):
     def __init__(self, *errs):
         self.exceptions = errs
+
+    def __contains__(self, item):
+        return item in self.exceptions
