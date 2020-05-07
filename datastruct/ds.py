@@ -83,16 +83,9 @@ class ValueAndError:
             return self.value
 
 
-def convert(annotation, value):
-    """This recapitulates the same logic as the DS.__init__ for a single element.
-
-    Parameters
-    ----------
-    annotation
-
-    Returns
-    -------
-
+def from_plain_value(annotation, value):
+    """Convert a plain value (typically loaded from a file)
+    into a DataStruct compatible value.
     """
 
     # (1) The annotation is a DataStruct subclass.
@@ -118,7 +111,7 @@ def convert(annotation, value):
                 )
             )
 
-        return convert(annotation.content[k], v)
+        return from_plain_value(annotation.content[k], v)
 
     # (3) The annotation type has a validate method.
     elif hasattr(annotation, "validate"):
@@ -136,7 +129,7 @@ def convert(annotation, value):
 
         if container_type is typing.Union:
             for t in internal_annotations:
-                out = convert(t, value)
+                out = from_plain_value(t, value)
                 if not isinstance(out, exceptions.ValidationError):
                     return ValueAndError(out)
             else:
@@ -154,8 +147,8 @@ def convert(annotation, value):
             tmp = []
 
             for ndx, (elk, elv) in enumerate(value.items()):
-                celk = convert(internal_annotations[0], elk)
-                celv = convert(internal_annotations[1], elv)
+                celk = from_plain_value(internal_annotations[0], elk)
+                celv = from_plain_value(internal_annotations[1], elv)
 
                 tmp.append((ValueAndError.auto(celk), ValueAndError.auto(celv)))
 
@@ -165,7 +158,7 @@ def convert(annotation, value):
 
             tmp = []
             for ndx, el in enumerate(value):
-                cel = convert(internal_annotations[0], el)
+                cel = from_plain_value(internal_annotations[0], el)
 
                 tmp.append(ValueAndError.auto(cel))
 
@@ -188,6 +181,85 @@ def convert(annotation, value):
             return ValueAndError(value)
         else:
             return ValueAndError.from_exc(exceptions.WrongTypeError(value, annotation))
+
+    # (7) Other cases are not supported.
+    else:
+        raise Exception(
+            "This should have been catched as subclass creation. "
+            "Please open an issue."
+        )
+
+
+def to_plain_value(annotation, value):
+    """Convert a value present in a DataStruct
+    into a plain value (compatible with serialization/)
+    """
+
+    # (1) The annotation is a DataStruct subclass.
+    if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
+
+        return value.to_dict()
+
+    # (2) The annotation is a KeyDefinedValue subclass.
+    elif inspect.isclass(annotation) and issubclass(annotation, KeyDefinedValue):
+
+        for k, v in annotation.content.items():
+            if isinstance(value, v):
+                return {k: to_plain_value(v, value)}
+        else:
+            raise TypeError("Type %s cannot be matched to %s" % (annotation, value))
+
+    # (3) The annotation type has a validate method.
+    elif hasattr(annotation, "validate"):
+
+        return value
+
+    # (4) The annotation type is a Qualified Generic (e.g. List[int])
+    elif typing_ext.is_qualified_generic(annotation):
+
+        container_type = annotation.__origin__
+        internal_annotations = annotation.__args__
+
+        if container_type is typing.Union:
+
+            raise Exception("Union not implemented yet for serialization")
+
+        if container_type is dict:
+
+            tmp = []
+
+            for ndx, (elk, elv) in enumerate(value.items()):
+                celk = to_plain_value(internal_annotations[0], elk)
+                celv = to_plain_value(internal_annotations[1], elv)
+
+                tmp.append((celk, celv))
+
+            return dict(tmp)
+
+        elif container_type in (list, tuple):
+
+            tmp = []
+            for ndx, el in enumerate(value):
+                cel = to_plain_value(internal_annotations[0], el)
+
+                tmp.append(cel)
+
+            return container_type(tmp)
+
+        else:
+            raise TypeError(f"Unknown container type {container_type}")
+
+    # (5) The annotation type is a Base Generic (e.g. List). Not supported, use list instead.
+    elif typing_ext.is_base_generic(annotation):
+        raise Exception(
+            "This should have been catched as subclass creation. "
+            "Please open an issue."
+        )
+
+    # (6) If the annotation type is a a type
+    elif isinstance(annotation, type):
+
+        return value
 
     # (7) Other cases are not supported.
     else:
@@ -265,7 +337,7 @@ class DataStruct:
                 continue
 
             # (2) We build a dictionary with the content.
-            new_content[key] = convert(annotation, value)
+            new_content[key] = from_plain_value(annotation, value)
 
         # Rationale: Part 2
         #   We then iterate over the annotations that have not been consumed by a provided items
@@ -423,6 +495,41 @@ class DataStruct:
             err_on_unexpected=err_on_unexpected,
             err_on_missing=err_on_missing,
         )
+
+    def to_dict(self):
+        """Convert the DataStruct into a dict, recursively iterating for all properties.
+
+        Returns
+        -------
+        dict
+        """
+        th = get_type_hints(self.__class__)
+
+        out = {}
+        for key, annotation in th.items():
+            val = getattr(self, key)
+            if inspect.isclass(annotation) and issubclass(annotation, KeyDefinedValue):
+                for k, v in annotation.content.items():
+                    if isinstance(val, v):
+                        out[key] = None
+            else:
+                out[key] = val
+
+        return out
+
+    def to_file(self, filename_or_file, fmt=None):
+        """Save the current DataStruct to a file.
+
+        This leverages the serialize library.
+
+        Parameters
+        ----------
+        filename_or_file : str or pathlib.Path
+        fmt : str or None
+            File format. Use None (default) to infer from the extension)
+
+        """
+        return serialize.dump(self.to_dict(), filename_or_file, fmt=fmt)
 
 
 class KeyDefinedValue:

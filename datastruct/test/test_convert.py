@@ -3,14 +3,14 @@ from typing import Dict, List, Tuple, Union
 import pytest
 
 from datastruct import exceptions
-from datastruct.ds import INVALID, KeyDefinedValue, convert
+from datastruct.ds import INVALID, KeyDefinedValue, from_plain_value
 
 
 @pytest.mark.parametrize(
     "annotation,value", [(float, 8.0), (int, 8), (bool, True), (str, "hello")]
 )
 def test_basic_types_ok(annotation, value):
-    out = convert(annotation, value)
+    out = from_plain_value(annotation, value)
     assert out.flatten() == value
     assert not out.get_errors()
 
@@ -19,7 +19,7 @@ def test_basic_types_ok(annotation, value):
     "annotation,value", [(float, 8), (int, 8.0), (bool, "bla"), (str, True)]
 )
 def test_basic_types_not_ok(annotation, value):
-    out = convert(annotation, value)
+    out = from_plain_value(annotation, value)
     assert out.flatten() == INVALID
     assert out.get_errors()
     assert isinstance(out.get_errors()[0], exceptions.WrongTypeError)
@@ -35,7 +35,7 @@ def test_basic_types_not_ok(annotation, value):
     ],
 )
 def test_qualified_generic_ok(annotation, value):
-    out = convert(annotation, value)
+    out = from_plain_value(annotation, value)
     assert out.flatten() == value
     assert not out.get_errors()
 
@@ -51,7 +51,7 @@ def test_qualified_generic_ok(annotation, value):
     ],
 )
 def test_qualified_generic_not_ok(annotation, value):
-    out = convert(annotation, value)
+    out = from_plain_value(annotation, value)
     assert out.flatten() != value
     assert out.get_errors()
 
@@ -70,7 +70,7 @@ class Example(KeyDefinedValue):
     ],
 )
 def test_kdv_ok(annotation, value, expected):
-    o = convert(annotation, value)
+    o = from_plain_value(annotation, value)
     assert not o.get_errors()
     assert o.value == expected
 
@@ -89,6 +89,6 @@ def test_kdv_ok(annotation, value, expected):
     ],
 )
 def test_kdv_not_ok(annotation, value, errs):
-    o = convert(annotation, value)
+    o = from_plain_value(annotation, value)
     assert o.get_errors() == errs
     assert o.value == INVALID

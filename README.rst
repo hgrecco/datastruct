@@ -78,6 +78,21 @@ You can then use the `DataStruct` object in your code:
 
     >>> print(cfg.email_servers[0].host)
 
+Other features
+--------------
+
+You can easily specify default values that
+
+.. code-block:: python
+
+    >>> class EmailServer(DataStruct):
+    ...
+    ...     host: str
+    ...     port: int = 25
+    ...     username: str
+    ...     password: str
+
+
 
 See AUTHORS_ for a list of the maintainers.
 
