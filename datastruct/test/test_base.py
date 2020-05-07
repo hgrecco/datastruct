@@ -1,6 +1,6 @@
 import typing
 
-from datastruct import DataStruct, KeyDefinedValue, exceptions, validators
+from datastruct import INVALID, DataStruct, KeyDefinedValue, exceptions, validators
 
 
 class Example(DataStruct):
@@ -13,6 +13,10 @@ class Example(DataStruct):
 class ExampleWithDefault(DataStruct):
     a: int
     b: str = "h"
+
+
+def test_invalid():
+    assert str(INVALID) == "<INVALID>"
 
 
 def test_exceptions():
