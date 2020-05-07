@@ -283,21 +283,41 @@ class DataStruct:
         for name, annotation in cls.__annotations__.items():
             if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
                 continue
+
             elif inspect.isclass(annotation) and issubclass(
                 annotation, KeyDefinedValue
             ):
                 continue
+
             elif hasattr(annotation, "validate"):
                 continue
+
             elif typing_ext.is_qualified_generic(annotation):
+
+                container_type = annotation.__origin__
+                internal_annotations = annotation.__args__
+                valid_union_types = {int, float, bool, str, tuple, list, dict}
+
+                if container_type is not typing.Union:
+                    continue
+
+                for t in internal_annotations:
+                    if t not in valid_union_types:
+                        raise TypeError(
+                            "%s are not currently allowed in Union, only %s"
+                            % (t, repr(valid_union_types))
+                        )
                 continue
+
             elif typing_ext.is_base_generic(annotation):
                 errs.append(
                     f"In {name}, {annotation} is an invalid annotation. "
                     f"Based generics (e.g. List) are allowed, used types (e.g. list) instead."
                 )
+
             elif isinstance(annotation, type):
                 continue
+
             else:
                 errs.append(
                     f"In {name}, {annotation} is an unknown kind of annotation."
