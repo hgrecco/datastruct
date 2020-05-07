@@ -50,3 +50,13 @@ def test_nested_nested():
 
     o = ExampleNestedNested(arg)
     assert o.get_errors() == errs
+
+
+def test_round_trip():
+    arg = dict(b=1, n1=dict(a=2))
+    o = ExampleNested(arg)
+    assert o.to_dict() == arg
+
+    arg = dict(c=3, n2=dict(b=2, n1=dict(a=1)))
+    o = ExampleNestedNested(arg)
+    assert o.to_dict() == arg

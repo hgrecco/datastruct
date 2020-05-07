@@ -507,13 +507,7 @@ class DataStruct:
 
         out = {}
         for key, annotation in th.items():
-            val = getattr(self, key)
-            if inspect.isclass(annotation) and issubclass(annotation, KeyDefinedValue):
-                for k, v in annotation.content.items():
-                    if isinstance(val, v):
-                        out[key] = None
-            else:
-                out[key] = val
+            out[key] = to_plain_value(annotation, getattr(self, key))
 
         return out
 
