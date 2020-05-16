@@ -2,7 +2,7 @@ datastruct Changelog
 =======================
 
 
-0.3 (unreleased)
+0.3 (2020-05-16)
 ----------------
 
 - Implemented function to merge dicts and use it in `from_filenames`.
