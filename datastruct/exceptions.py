@@ -143,3 +143,9 @@ class MultipleError(ValidationError):
 
     def __contains__(self, item):
         return item in self.exceptions
+
+    def __str__(self):
+        return str([str(e) for e in self.exceptions])
+
+    def __repr__(self):
+        return repr([repr(e) for e in self.exceptions])

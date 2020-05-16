@@ -10,12 +10,12 @@
 
 import inspect
 import typing
-from collections import ChainMap
 from typing import Iterable, List, Tuple, get_type_hints
 
 import serialize
 
 from . import exceptions, typing_ext
+from .common import merge
 
 
 class _INVALID:
@@ -508,7 +508,7 @@ class DataStruct:
         DataStruct
         """
 
-        dct = ChainMap(*tuple(serialize.load(filename, fmt) for filename in filenames))
+        dct = merge(tuple(serialize.load(filename, fmt) for filename in filenames))
         return cls.from_dict(
             dct,
             raise_on_error=raise_on_error,
