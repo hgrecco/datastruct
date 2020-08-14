@@ -395,7 +395,7 @@ class DataStruct:
 
         if ignortypes:
             return tuple(
-                exc for exc in self.__errors__ if not isinstance(exc, ignortypes)
+                exc for exc in self.__errors__ if not isinstance(exc, tuple(ignortypes))
             )
         else:
             return tuple(self.__errors__)

@@ -68,6 +68,10 @@ def test_missing():
     e = errs[0]
     assert e == exceptions.MissingValueError("b", Example)
 
+    errs = o.get_errors(err_on_missing=False)
+    assert isinstance(errs, tuple)
+    assert len(errs) == 0
+
 
 def test_unexpected():
 
@@ -83,6 +87,10 @@ def test_unexpected():
     assert len(errs) == 1
     e = errs[0]
     assert e == exceptions.UnexpectedKeyError("e", Example)
+
+    errs = o.get_errors(err_on_unexpected=False)
+    assert isinstance(errs, tuple)
+    assert len(errs) == 0
 
 
 def test_example_default():
