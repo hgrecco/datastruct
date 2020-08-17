@@ -87,6 +87,9 @@ def from_plain_value(annotation, value):
     """Convert a plain value (typically loaded from a file)
     into a DataStruct compatible value.
     """
+    # (0) Unpack the annotation if it's an Annotated[type, metadata] instance (PEP 593).
+    if isinstance(annotation, typing_ext._AnnotatedAlias):
+        annotation = annotation.__origin__
 
     # (1) The annotation is a DataStruct subclass.
     if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
@@ -194,6 +197,9 @@ def to_plain_value(annotation, value):
     """Convert a value present in a DataStruct
     into a plain value (compatible with serialization/)
     """
+    # (0) Unpack the annotation if it's an Annotated[type, metadata] instance (PEP 593).
+    if isinstance(annotation, typing_ext._AnnotatedAlias):
+        annotation = annotation.__origin__
 
     # (1) The annotation is a DataStruct subclass.
     if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
@@ -281,6 +287,10 @@ class DataStruct:
     def __init_subclass__(cls, **kwargs):
         errs = []
         for name, annotation in get_type_hints(cls).items():
+            # (0) Unpack the annotation if it's an Annotated[type, metadata] instance (PEP 593).
+            if isinstance(annotation, typing_ext._AnnotatedAlias):
+                annotation = annotation.__origin__
+
             if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
                 continue
 
