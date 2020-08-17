@@ -280,7 +280,7 @@ class DataStruct:
 
     def __init_subclass__(cls, **kwargs):
         errs = []
-        for name, annotation in cls.__annotations__.items():
+        for name, annotation in get_type_hints(cls).items():
             if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
                 continue
 
