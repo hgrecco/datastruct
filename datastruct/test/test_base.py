@@ -1,5 +1,10 @@
 import typing
 
+try:
+    from typing import Annotated
+except ImportError:
+    from typing_extensions import Annotated
+
 from datastruct import INVALID, DataStruct, KeyDefinedValue, exceptions, validators
 
 
@@ -98,6 +103,16 @@ def test_example_default():
     o = ExampleWithDefault(dict(a=1))
     assert o.a == 1
     assert o.b == "h"
+
+
+def test_example_annotated():
+    class ExampleWithAnnotations(DataStruct):
+        a: int
+        b: Annotated[float, "metadata"]  # noqa: F821
+
+    o = ExampleWithAnnotations(dict(a=1, b=1.0))
+    assert o.a == 1
+    assert o.b == 1.0
 
 
 def test_validators():
