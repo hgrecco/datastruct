@@ -1,5 +1,10 @@
 import typing
 
+try:
+    from typing import Annotated
+except ImportError:
+    from typing_extensions import Annotated
+
 from datastruct import INVALID, DataStruct, KeyDefinedValue, exceptions, validators
 
 
@@ -68,6 +73,10 @@ def test_missing():
     e = errs[0]
     assert e == exceptions.MissingValueError("b", Example)
 
+    errs = o.get_errors(err_on_missing=False)
+    assert isinstance(errs, tuple)
+    assert len(errs) == 0
+
 
 def test_unexpected():
 
@@ -84,12 +93,26 @@ def test_unexpected():
     e = errs[0]
     assert e == exceptions.UnexpectedKeyError("e", Example)
 
+    errs = o.get_errors(err_on_unexpected=False)
+    assert isinstance(errs, tuple)
+    assert len(errs) == 0
+
 
 def test_example_default():
 
     o = ExampleWithDefault(dict(a=1))
     assert o.a == 1
     assert o.b == "h"
+
+
+def test_example_annotated():
+    class ExampleWithAnnotations(DataStruct):
+        a: int
+        b: Annotated[float, "metadata"]  # noqa: F821
+
+    o = ExampleWithAnnotations(dict(a=1, b=1.0))
+    assert o.a == 1
+    assert o.b == 1.0
 
 
 def test_validators():
