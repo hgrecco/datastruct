@@ -17,6 +17,12 @@
 
 import typing
 
+try:
+    from typing import _AnnotatedAlias  # noqa: F401
+except ImportError:
+    from typing_extensions import _AnnotatedAlias  # noqa: F401
+
+
 if hasattr(typing, "_GenericAlias"):
     # python 3.7 and 3.8
     def _is_generic(cls):
