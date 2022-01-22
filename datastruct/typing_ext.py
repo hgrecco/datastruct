@@ -25,23 +25,6 @@ except ImportError:
 
 if hasattr(typing, "_GenericAlias"):
     # python 3.7 and 3.8
-    def _is_generic(cls):
-        if isinstance(cls, typing._GenericAlias):
-            return True
-
-        if cls in {
-            typing.List,
-            typing.Tuple,
-            typing.Union,
-            typing.Optional,
-            typing.Dict,
-        }:
-            return True
-
-        if isinstance(cls, typing._SpecialForm):
-            return cls not in {typing.Any}
-
-        return False
 
     try:
         # Python 3.8
@@ -54,6 +37,24 @@ if hasattr(typing, "_GenericAlias"):
         VGA = typing._VariadicGenericAlias
     except Exception:
         VGA = None
+
+    def _is_generic(cls):
+        if isinstance(cls, typing._GenericAlias):
+            return True
+
+        if VGA is None and cls in {
+            typing.List,
+            typing.Tuple,
+            typing.Union,
+            typing.Optional,
+            typing.Dict,
+        }:
+            return True
+
+        if isinstance(cls, typing._SpecialForm):
+            return cls not in {typing.Any}
+
+        return False
 
     def _is_base_generic(cls):
         if isinstance(cls, typing._GenericAlias):
@@ -69,7 +70,7 @@ if hasattr(typing, "_GenericAlias"):
 
             return len(cls.__parameters__) > 0
 
-        if cls in {
+        if VGA is None and cls in {
             typing.List,
             typing.Tuple,
             typing.Union,
