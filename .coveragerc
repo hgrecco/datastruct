@@ -1,4 +1,4 @@
 [run]
 source = datastruct
-omit = datastruct/test/*
+omit = datastruct/testsuite/*
 
