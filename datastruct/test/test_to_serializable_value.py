@@ -17,7 +17,12 @@ def test_basic_types_ok(annotation, value):
 @pytest.mark.parametrize(
     "annotation,value",
     [
-        (List[int], [8,]),  # noqa E231
+        (
+            List[int],
+            [
+                8,
+            ],
+        ),  # noqa E231
         (Tuple[int], (8,)),
         # (Union[int, float], 8),
         (Dict[int, int], {1: 2}),

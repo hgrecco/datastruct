@@ -28,7 +28,12 @@ def test_basic_types_not_ok(annotation, value):
 @pytest.mark.parametrize(
     "annotation,value",
     [
-        (List[int], [8,]),  # noqa E231
+        (
+            List[int],
+            [
+                8,
+            ],
+        ),  # noqa E231
         (Tuple[int], (8,)),
         (Union[int, float], 8),
         (Dict[int, int], {1: 2}),
@@ -43,7 +48,12 @@ def test_qualified_generic_ok(annotation, value):
 @pytest.mark.parametrize(
     "annotation,value",
     [
-        (List[int], [8.0,]),  # noqa E231
+        (
+            List[int],
+            [
+                8.0,
+            ],
+        ),  # noqa E231
         (List[int], (8,)),
         (Union[int, float], "hello"),
         (Dict[float, int], {1: 2}),
@@ -78,9 +88,21 @@ def test_kdv_ok(annotation, value, expected):
 @pytest.mark.parametrize(
     "annotation,value,errs",
     [
-        (Example, dict(a=1.0), (exceptions.WrongTypeError(1.0, int),),),
-        (Example, dict(b=True), (exceptions.WrongTypeError(True, str),),),
-        (Example, dict(c=2), (exceptions.WrongTypeError(2, float),),),
+        (
+            Example,
+            dict(a=1.0),
+            (exceptions.WrongTypeError(1.0, int),),
+        ),
+        (
+            Example,
+            dict(b=True),
+            (exceptions.WrongTypeError(True, str),),
+        ),
+        (
+            Example,
+            dict(c=2),
+            (exceptions.WrongTypeError(2, float),),
+        ),
         (
             Example,
             dict(z=2),

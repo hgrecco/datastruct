@@ -29,8 +29,7 @@ INVALID = _INVALID()
 
 
 class ValueAndError:
-    """This class provides a comm
-    """
+    """This class provides a comm"""
 
     def __init__(self, value, error=()):
         self.value = value

@@ -44,8 +44,22 @@ def test_nested_nested():
 
     arg = dict(c=3, n2=dict(b=2, n1=dict(z=3)))
     errs = (
-        exceptions.UnexpectedKeyError("z", ExampleSingle, path=("n2", "n1",)),
-        exceptions.MissingValueError("a", ExampleSingle, path=("n2", "n1",)),
+        exceptions.UnexpectedKeyError(
+            "z",
+            ExampleSingle,
+            path=(
+                "n2",
+                "n1",
+            ),
+        ),
+        exceptions.MissingValueError(
+            "a",
+            ExampleSingle,
+            path=(
+                "n2",
+                "n1",
+            ),
+        ),
     )
 
     o = ExampleNestedNested(arg)

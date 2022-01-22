@@ -17,8 +17,7 @@ from typing import Tuple
 
 
 class ValidationError(Exception):
-    """Base class for all exceptions of the package.
-    """
+    """Base class for all exceptions of the package."""
 
     #: top-to-bottom path to reach location at which the error has ocurred.
     path: Tuple[str]
@@ -98,8 +97,7 @@ class ValidationError(Exception):
 
 
 class MissingValueError(ValidationError):
-    """A value required by the schema was not provided.
-    """
+    """A value required by the schema was not provided."""
 
     def __init__(self, key, klass, **kwargs):
         super().__init__(**kwargs)
@@ -108,8 +106,7 @@ class MissingValueError(ValidationError):
 
 
 class UnexpectedKeyError(ValidationError):
-    """A key not defined in the schema was provided.
-    """
+    """A key not defined in the schema was provided."""
 
     def __init__(self, key, klass, **kwargs):
         super().__init__(**kwargs)
@@ -118,8 +115,7 @@ class UnexpectedKeyError(ValidationError):
 
 
 class WrongTypeError(ValidationError):
-    """A provided value was not of the correct type.
-    """
+    """A provided value was not of the correct type."""
 
     def __init__(self, value, expected, **kwargs):
         super().__init__(**kwargs)
@@ -128,8 +124,7 @@ class WrongTypeError(ValidationError):
 
 
 class WrongValueError(ValidationError):
-    """A provided value has the right type but the value is not in range o accepted.
-    """
+    """A provided value has the right type but the value is not in range o accepted."""
 
     def __init__(self, value, expected, **kwargs):
         super().__init__(**kwargs)

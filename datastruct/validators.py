@@ -20,8 +20,7 @@ import validators
 
 
 class Validator:
-    """Base class for validators.
-    """
+    """Base class for validators."""
 
     @classmethod
     def validate(self, instance):
@@ -29,8 +28,7 @@ class Validator:
 
 
 class StrValidator(Validator):
-    """Base class for all string validators.
-    """
+    """Base class for all string validators."""
 
     func = lambda s: False
 
