@@ -29,6 +29,15 @@ if hasattr(typing, "_GenericAlias"):
         if isinstance(cls, typing._GenericAlias):
             return True
 
+        if cls in {
+            typing.List,
+            typing.Tuple,
+            typing.Union,
+            typing.Optional,
+            typing.Dict,
+        }:
+            return True
+
         if isinstance(cls, typing._SpecialForm):
             return cls not in {typing.Any}
 
@@ -37,21 +46,37 @@ if hasattr(typing, "_GenericAlias"):
     try:
         # Python 3.8
         Prot = typing.Protocol
-        VGA = typing._VariadicGenericAlias
     except AttributeError:
         # Python 3.7
         Prot = typing._Protocol
+
+    try:
         VGA = typing._VariadicGenericAlias
+    except Exception:
+        VGA = None
 
     def _is_base_generic(cls):
         if isinstance(cls, typing._GenericAlias):
             if cls.__origin__ in {typing.Generic, Prot}:
                 return False
 
-            if isinstance(cls, VGA):
-                return True
+            if VGA:
+                if isinstance(cls, VGA):
+                    return True
+            else:
+                if cls.__origin__ in {typing.Union, typing.Callable}:
+                    return len(cls.__parameters__) > 0
 
             return len(cls.__parameters__) > 0
+
+        if cls in {
+            typing.List,
+            typing.Tuple,
+            typing.Union,
+            typing.Optional,
+            typing.Dict,
+        }:
+            return not bool(typing.get_args(cls))
 
         if isinstance(cls, typing._SpecialForm):
             return cls._name in {"ClassVar", "Union", "Optional"}
