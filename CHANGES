@@ -5,7 +5,9 @@ datastruct Changelog
 0.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Add DEFAULT_TO_KEY special value to allow object attributes to default 
+  to the key of the dictionary in which the object is stored.
+- Bumped serialize requirement to support pathlib.Path
 
 
 0.4 (2022-01-22)
