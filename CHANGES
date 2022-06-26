@@ -2,7 +2,7 @@ datastruct Changelog
 =======================
 
 
-0.5 (unreleased)
+0.5 (2022-06-25)
 ----------------
 
 - Add DEFAULT_TO_KEY special value to allow object attributes to default
