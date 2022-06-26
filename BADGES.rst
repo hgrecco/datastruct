@@ -17,4 +17,3 @@
 .. image:: https://coveralls.io/repos/github/hgrecco/datastruct/badge.svg?branch=master
     :target: https://coveralls.io/github/hgrecco/datastruct?branch=master
     :alt: Coverage
-

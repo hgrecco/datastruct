@@ -84,7 +84,6 @@ if hasattr(typing, "_GenericAlias"):
 
         return False
 
-
 else:  # pragma: no cover
     # python <3.7
     if hasattr(typing, "_Union"):
