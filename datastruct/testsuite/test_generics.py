@@ -32,6 +32,12 @@ class ExampleNestedTuple(DataStruct):
     n: Tuple[ExampleSingle]
 
 
+class ExampleNestedTupleWithDefK(DataStruct):
+
+    a: int
+    n: Tuple[ExampleSingleWithDefK]
+
+
 class ExampleNestedDict(DataStruct):
 
     a: int
@@ -119,6 +125,10 @@ def test_defk():
 
 
 def test_dict_int_with_defk():
+
+    with pytest.raises(ValueError):
+        arg = dict(a=1, n=tuple(dict(a=2)))
+        o = ExampleNestedTupleWithDefK(arg)
 
     arg = dict(a=1, n=dict(k=dict(a=2)))
     o = ExampleNestedDictWithDefK(arg)
