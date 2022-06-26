@@ -19,14 +19,19 @@ from . import exceptions, typing_ext
 from .common import merge
 
 
-class _INVALID:
-    def __str__(self):
-        return "<INVALID>"
+def named_object(name):
+    class CLS:
+        def __str__(self):
+            return f"<{name}>"
 
-    __repr__ = __str__
+        __repr__ = __str__
+
+    return CLS()
 
 
-INVALID = _INVALID()
+INVALID = named_object("INVALID")
+MISSING = named_object("MISSING")
+DEFAULT_TO_KEY = named_object("DEFAULT_TO_KEY")
 
 
 class ValueAndError:
@@ -83,7 +88,7 @@ class ValueAndError:
             return self.value
 
 
-def from_plain_value(annotation, value):
+def from_plain_value(annotation, value, key=MISSING):
     """Convert a plain value (typically loaded from a file)
     into a DataStruct compatible value.
     """
@@ -93,8 +98,10 @@ def from_plain_value(annotation, value):
 
     # (1) The annotation is a DataStruct subclass.
     if inspect.isclass(annotation) and issubclass(annotation, DataStruct):
+        if not isinstance(value, dict):
+            raise ValueError("DataStruct instances must be constructed with a dict")
 
-        return annotation(value)
+        return annotation(value, key)
 
     # (2) The annotation is a KeyDefinedValue subclass.
     elif inspect.isclass(annotation) and issubclass(annotation, KeyDefinedValue):
@@ -151,7 +158,7 @@ def from_plain_value(annotation, value):
 
             for ndx, (elk, elv) in enumerate(value.items()):
                 celk = from_plain_value(internal_annotations[0], elk)
-                celv = from_plain_value(internal_annotations[1], elv)
+                celv = from_plain_value(internal_annotations[1], elv, elk)
 
                 tmp.append((ValueAndError.auto(celk), ValueAndError.auto(celv)))
 
@@ -177,9 +184,8 @@ def from_plain_value(annotation, value):
             "Please open an issue."
         )
 
-    # (6) If the annotation type is a a type
+    # (6) If the annotation type is a type
     elif isinstance(annotation, type):
-
         if isinstance(value, annotation):
             return ValueAndError(value)
         else:
@@ -338,7 +344,7 @@ class DataStruct:
             )
         super().__init_subclass__(**kwargs)
 
-    def __init__(self, content):
+    def __init__(self, content, parent_key=MISSING):
 
         #: Errors found when filling the data structure.
         self.__errors__: List[exceptions.ValidationError] = []
@@ -372,11 +378,18 @@ class DataStruct:
         # Rationale: Part 2
         #   We then iterate over the annotations that have not been consumed by a provided items
         #   and report an error if there is no default value.
-        for key, value in th.items():
+        for key, ann in th.items():
             if not hasattr(self, key):
                 self.__errors__.append(
                     exceptions.MissingValueError(key, self.__class__)
                 )
+            elif getattr(self, key) is DEFAULT_TO_KEY:
+                if parent_key is MISSING:
+                    raise ValueError(
+                        f"In {self.__class__}.{key}, cannot DEFAULT_TO_KEY outside a dict"
+                    )
+                else:
+                    new_content[key] = from_plain_value(ann, parent_key)
 
         for key, value in new_content.items():
             self.__errors__.extend((exc.with_parent(key) for exc in value.get_errors()))

@@ -9,7 +9,7 @@
 """
 
 from . import validators
-from .ds import INVALID, DataStruct, KeyDefinedValue
+from .ds import DEFAULT_TO_KEY, INVALID, DataStruct, KeyDefinedValue
 from .exceptions import (
     MissingValueError,
     UnexpectedKeyError,
@@ -43,4 +43,5 @@ __all__ = [
     ValidationError,
     KeyDefinedValue,
     INVALID,
+    DEFAULT_TO_KEY,
 ]
