@@ -9,8 +9,9 @@
 """
 
 import inspect
+import pathlib
 import typing
-from typing import Iterable, List, Tuple, get_type_hints
+from typing import Iterable, List, Tuple, Union, get_type_hints
 
 import serialize
 
@@ -488,7 +489,7 @@ class DataStruct:
     @classmethod
     def from_filenames(
         cls,
-        filenames: Iterable[str],
+        filenames: Iterable[Union[str, pathlib.Path]],
         fmt=None,
         *,
         raise_on_error=True,
